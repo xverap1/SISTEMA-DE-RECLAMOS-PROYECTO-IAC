@@ -1,4 +1,6 @@
 # SISTEMA-DE-RECLAMOS-PROYECTO-IAC
 Proyecto del Sistema de Reclamos 
 
-- Vera Romero
+- Flores Juarez William Henry
+- Vargas Perez, Bray
+- Vera Perez, Xiomara Natali
