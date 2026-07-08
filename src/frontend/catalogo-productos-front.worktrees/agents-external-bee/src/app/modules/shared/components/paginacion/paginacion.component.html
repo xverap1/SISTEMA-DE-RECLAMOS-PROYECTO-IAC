@@ -1,0 +1,27 @@
+<div class="d-flex justify-content-between align-items-center w-100 py-2">
+  <div class="text-muted" style="font-size: 0.85rem;">
+    Mostrando del <b>{{ totalItems === 0 ? 0 : (paginaActual - 1) * itemsPorPagina + 1 }}</b> al 
+    <b>{{ totalItems < paginaActual * itemsPorPagina ? totalItems : paginaActual * itemsPorPagina }}</b> 
+    de un total de <b>{{ totalItems }}</b> registros.
+  </div>
+  
+  @if (totalPaginas > 1) {
+    <nav aria-label="Navegación de páginas">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="paginaActual === 1">
+          <button class="page-link btn" (click)="cambiarPagina(paginaActual - 1)">&laquo;</button>
+        </li>
+        
+        @for (pagina of totalPaginasArray; track pagina) {
+          <li class="page-item" [class.active]="paginaActual === pagina">
+            <button class="page-link btn" (click)="cambiarPagina(pagina)">{{ pagina }}</button>
+          </li>
+        }
+
+        <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+          <button class="page-link btn" (click)="cambiarPagina(paginaActual + 1)">&raquo;</button>
+        </li>
+      </ul>
+    </nav>
+  }
+</div>

@@ -1,0 +1,56 @@
+<div class="franja-gob" style="background-color: #0C231E; font-size: 0.85rem;">
+  <div class="container d-flex justify-content-between align-items-center py-2 text-white">
+    <div class="d-flex align-items-center">
+      <img src="images/logo-gob.svg" alt="Gobierno de México" style="height: 38px;" class="me-2">
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <a href="#" class="text-white text-decoration-none hover-link">Trámites</a>
+      <a href="#" class="text-white text-decoration-none hover-link">Gobierno</a>
+      <button class="btn btn-link text-white p-0"><i class="bi bi-search"></i></button>
+    </div>
+  </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #13322B;">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-white tracking-wide" href="#">IMSS</a>
+    <a class="navbar-brand d-flex align-items-center text-white" href="#">
+      <span class="fw-bold fs-6 d-none d-sm-inline">Control de Catálogo</span>
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="d-flex align-items-center gap-3">
+      @if (estaLogueado) {
+        <span class="text-white-50 small d-none d-md-inline">
+          <i class="bi bi-person-circle me-1"></i> Bienvenido, <b>{{ nombreUsuario }}</b>
+        </span>
+
+        <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2 px-3" (click)="cerrarSesion()">
+          <i class="bi bi-box-arrow-right"></i> Salir del Sistema
+        </button>
+      }
+    </div>
+    <!--
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav gap-2" style="font-size: 0.95rem;">
+        <li class="nav-item">
+          <a class="nav-link text-white active" href="#">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white-50" href="#">Conoce al IMSS</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white-50" href="#">IMSS Transparente</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white-50" href="#">Directorio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white-50" href="#">Contacto ciudadano</a>
+        </li>
+      </ul>
+    </div>-->
+  </div>
+</nav>

@@ -1,0 +1,28 @@
+<div class="p-3 bg-light border-bottom rounded-top">
+  <form [formGroup]="filterForm" class="row g-3 align-items-end" style="font-size: 0.9rem;">
+    <div class="col-md-4">
+      <label class="form-label fw-semibold text-muted">Nombre o Descripción</label>
+      <div class="input-group input-group-sm">
+        <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
+        <input type="text" formControlName="nombre" class="form-control" placeholder="Buscar...">
+      </div>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label fw-semibold text-muted">Clave</label>
+      <input type="text" formControlName="clave" class="form-control form-control-sm text-uppercase" placeholder="Clave">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label fw-semibold text-muted">Precio Mínimo</label>
+      <input type="number" formControlName="precioMin" class="form-control form-control-sm" placeholder="0.00">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label fw-semibold text-muted">Precio Máximo</label>
+      <input type="number" formControlName="precioMax" class="form-control form-control-sm" placeholder="99999">
+    </div>
+    <div class="col-md-2">
+      <button type="button" class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-2" (click)="limpiarFiltros()">
+        <i class="bi bi-eraser"></i> Limpiar
+      </button>
+    </div>
+  </form>
+</div>

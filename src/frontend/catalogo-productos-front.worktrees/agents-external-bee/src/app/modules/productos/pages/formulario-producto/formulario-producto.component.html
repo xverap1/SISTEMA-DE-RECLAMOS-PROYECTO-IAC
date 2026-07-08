@@ -1,0 +1,73 @@
+<div class="card shadow-sm border-0 mt-4">
+  <div class="card-header bg-white py-3 border-bottom">
+    <h5 class="mb-0 text-secondary fw-bold">
+      <i class="bi bi-file-earmark-plus me-2"></i>Registrar Nuevo Producto
+    </h5>
+  </div>
+
+  <div class="card-body p-4">
+    <form [formGroup]="productoForm" (ngSubmit)="guardar()">
+      
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="claveProducto" class="form-label fw-semibold text-muted">Clave del Producto *</label>
+          <input type="text" id="claveProducto" formControlName="claveProducto" 
+                 class="form-control text-uppercase" placeholder="Ej: LAP-M3-01"
+                 [ngClass]="{ 'is-invalid': f['claveProducto'].touched && f['claveProducto'].errors }">
+          
+          <div class="invalid-feedback">
+            @if (f['claveProducto'].errors?.['required']) { <span>La clave es obligatoria.</span> }
+            @if (f['claveProducto'].errors?.['maxlength']) { <span>Máximo 10 caracteres permitidos.</span> }
+            @if (f['claveProducto'].errors?.['pattern']) { <span>Solo letras, números y guiones.</span> }
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="precio" class="form-label fw-semibold text-muted">Precio ($) *</label>
+          <div class="input-group has-validation">
+            <span class="input-group-text">$</span>
+            <input type="number" id="precio" formControlName="precio" step="0.01"
+                   class="form-control" placeholder="0.00"
+                   [ngClass]="{ 'is-invalid': f['precio'].touched && f['precio'].errors }">
+            <div class="invalid-feedback">
+              @if (f['precio'].errors?.['required']) { <span>El precio es obligatorio.</span> }
+              @if (f['precio'].errors?.['min']) { <span>El precio debe ser mayor a cero.</span> }
+              @if (f['precio'].errors?.['pattern']) { <span>Máximo 2 posiciones decimales.</span> }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="usuarioAuditor" class="form-label fw-semibold text-muted">Usuario Auditor</label>
+          <input type="text" id="usuarioAuditor" formControlName="usuarioAuditor" class="form-control bg-light" readonly>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="nombreProducto" class="form-label fw-semibold text-muted">Descripción o Nombre del Producto *</label>
+        <textarea id="nombreProducto" formControlName="nombreProducto" rows="3"
+                  class="form-control" placeholder="Ingrese el nombre detallado del artículo..."
+                  [ngClass]="{ 'is-invalid': f['nombreProducto'].touched && f['nombreProducto'].errors }"></textarea>
+        <div class="invalid-feedback">
+          @if (f['nombreProducto'].errors?.['required']) { <span>El nombre del producto es obligatorio.</span> }
+          @if (f['nombreProducto'].errors?.['maxlength']) { <span>La descripción no puede exceder los 200 caracteres.</span> }
+        </div>
+        <div class="form-text text-end" style="font-size: 0.8rem;">
+          {{ f['nombreProducto'].value?.length || 0 }} / 200 caracteres
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 border-top pt-3">
+        <button type="button" class="btn btn-outline-secondary px-4"
+                data-bs-dismiss="modal" aria-label="Close">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-success px-4" style="background-color: #13322B; border: none;">
+          <i class="bi" [ngClass]="esEdicion ? 'bi-pencil-square me-2' : 'bi-disk me-2'"></i>
+        {{ esEdicion ? 'Guardar Cambios' : 'Registrar Producto' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

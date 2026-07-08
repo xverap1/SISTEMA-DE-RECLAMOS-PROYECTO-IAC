@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: gestor-productos
+# =========================================================================
+# CONFIGURACIÓN DE CONEXIÓN A MARIADB Y JPA (FORMATO YAML)
+# =========================================================================
+  cloud:
+   config:
+     enabled: false
+  datasource:
+    # Reemplaza 'localhost:3306' si tu puerto cambia y 'mi_base_datos' por tu esquema real
+    url: jdbc:mariadb://localhost:3307/gestor-productos?createDatabaseIfNotExist=true
+    username: root
+    password: admin123
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+
+    # Crea la tabla automáticamente o añade columnas nuevas sin borrar datos existentes
+    hibernate:
+      ddl-auto: update
+
+    # Herramientas de depuración en la consola de IntelliJ
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: smtp.mailersend.net
+    port: 587
+    username: 'MS_hclpcu@test-2p0347zwkeklzdrn.mlsender.net'
+    password: 'mssp.rBMKJYa.jpzkmgqrrx24059v.lFNWiP4'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# =========================================================================
+# CONFIGURACIÓN DEL CIRCUIT BREAKER (RESILIENCE4J)
+# =========================================================================
+resilience4j:
+  circuitbreaker:
+    instances:
+      productosCB:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3

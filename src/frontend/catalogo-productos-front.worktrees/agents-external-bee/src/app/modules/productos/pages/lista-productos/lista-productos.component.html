@@ -1,0 +1,165 @@
+<div class="card shadow-sm border-0 mt-4">
+  <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+    <h5 class="mb-0 text-secondary fw-bold">
+      <i class="bi bi-box-seam me-2"></i>Catálogo de Productos
+    </h5>
+<div class="d-flex gap-2">
+    <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-2" (click)="exportarProductos()">
+      <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+    </button>
+    
+    <button class="btn btn-success btn-sm d-flex align-items-center gap-2" 
+            style="background-color: #13322B; border: none;"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalRegistroProducto"
+            (click)="prepararNuevoProducto()"
+            *ngIf="authService.puedeEditar()">
+      <i class="bi bi-plus-circle"></i> Nuevo Producto
+    </button>
+    <button class="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#modalHistorialAuditoria"
+            *ngIf="authService.esAdmin()">
+      <i class="bi bi-journal-text text-success"></i> 
+      Ver Bitácora de Auditoría
+    </button>    
+  </div>   
+  </div>
+
+  <app-filtros-busqueda (alFiltrar)="onFiltrosCambiados($event)"></app-filtros-busqueda>
+
+  <div class="card-body p-0">   
+    <div class="table-responsive">
+      <table class="table table-hover table-striped mb-0 align-middle">
+        <thead class="table-light text-secondary" style="font-size: 0.9rem;">
+          <tr>
+            <th scope="col" class="ps-4">Folio de Negocio</th>
+            <th scope="col">Clave</th>
+            <th scope="col">Descripción del Producto</th>
+            <th scope="col" class="text-end">Precio</th>
+            <th scope="col" class="text-center">Estado</th>
+            <th scope="col">Fecha Registro</th>
+            <th *ngIf="authService.puedeEditar()" scope="col" class="text-center pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody style="font-size: 0.95rem;">
+          @for (producto of productosPaginados; track producto.id) {
+            <tr>
+              <td class="ps-4 fw-bold text-muted">{{ producto.folioNegocio }}</td>
+              
+              <td><span class="badge bg-light text-dark border">{{ producto.claveProducto }}</span></td>
+              
+              <td>{{ producto.nombreProducto }}</td>
+              
+              <td class="text-end fw-semibold">{{ producto.precio | currency:'USD':'symbol':'1.2-2' }}</td>
+              
+              <td class="text-center">
+                @if (producto.activo) {
+                  <span class="badge bg-success-subtle text-success px-2 py-1">Activo</span>
+                } @else {
+                  <span class="badge bg-danger-subtle text-danger px-2 py-1">Inactivo</span>
+                }
+              </td>
+              
+              <td>{{ producto.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+              
+              <td class="text-center pe-4" *ngIf="authService.puedeEditar()">
+                <div class="btn-group" role="group">
+                  <button class="btn btn-outline-primary btn-sm" title="Editar Producto" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#modalRegistroProducto"
+                    (click)="editarProducto(producto)"
+                    [disabled]="!producto.activo">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button *ngIf="authService.esAdmin()" class="btn btn-outline-danger btn-sm" title="Desactivar Producto" 
+                  [disabled]="!producto.activo"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalDesactivarProducto"
+                  (click)="productoSeleccionado = producto">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <i class="bi bi-info-circle fs-2 d-block mb-2"></i>
+                No se encontraron productos registrados en el catálogo.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+    <div class="card-footer bg-white py-3 border-top">
+        <app-paginacion 
+        [paginaActual]="paginaActual"
+        [totalItems]="productosFiltrados.length"
+        [itemsPorPagina]="itemsPorPagina"
+        (alCambiarPagina)="onPaginaCambiada($event)">
+        </app-paginacion>
+    </div>  
+    <div class="modal fade" id="modalRegistroProducto" tabindex="-1" aria-labelledby="modalRegistroLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+        <div class="modal-header text-white" style="background-color: #13322B;">
+            <h5 class="modal-title fw-bold" id="modalRegistroLabel">
+            <i class="bi bi-file-earmark-plus me-2"></i>Registrar Nuevo Producto
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+            (click)="prepararNuevoProducto()"></button>
+        </div>
+        <div class="modal-body p-0">
+            <app-formulario-producto [productoAEditar]="productoSeleccionado"
+            (alGuardarExitoso)="obtenerProductos()"></app-formulario-producto>
+        </div>
+        </div>
+    </div>
+    </div>
+    <div class="modal fade" id="modalDesactivarProducto" tabindex="-1" aria-labelledby="modalDesactivarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+        <div class="modal-header text-white" style="background-color: #13322B;">
+            <h5 class="modal-title fw-bold" id="modalDesactivarLabel">
+            <i class="bi bi-trash me-2"></i>Desactivar Producto
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+            <p class="mb-4">¿Estás seguro de que deseas desactivar el producto <strong>{{ productoSeleccionado?.nombreProducto }}</strong>? Esta acción no se puede deshacer.</p>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-danger" 
+                (click)="desactivarProducto(productoSeleccionado)"
+                data-bs-dismiss="modal">Desactivar</button>
+            </div>
+        </div>
+    </div>  
+</div>
+    </div>
+<div class="modal fade" id="modalHistorialAuditoria" tabindex="-1" aria-labelledby="modalHistorialLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      
+      <div class="modal-header bg-light border-bottom">
+        <h5 class="modal-title fw-bold text-success d-flex align-items-center gap-2" id="modalHistorialLabel">
+          <i class="bi bi-clock-history text-success"></i>
+          Línea de Tiempo - Historial de Operaciones
+        </h5>
+        <button type="button" class="btn-close" data-bs-redirect="modal" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body bg-light-subtle">
+        <app-historial-auditoria></app-historial-auditoria>
+      </div>
+      
+      <div class="modal-footer bg-light border-top">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar Historial</button>
+      </div>
+
+    </div>
+  </div>
+</div>
