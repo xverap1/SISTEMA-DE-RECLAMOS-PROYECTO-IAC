@@ -1,0 +1,30 @@
+{
+  "name": "reclamos-lambdas",
+  "version": "1.0.0",
+  "description": "Lambdas Node.js del Sistema de Reclamos (reclamos, reportes, control-plazos, procesamiento, notificaciones)",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js",
+    "test": "jest --coverage",
+    "build": "node build.js",
+    "build:reclamos": "node build.js lambda-reclamos",
+    "build:reportes": "node build.js lambda-reportes",
+    "build:procesamiento": "node build.js lambda-procesamiento",
+    "build:control-plazos": "node build.js lambda-control-plazos",
+    "build:notificaciones": "node build.js lambda-notificaciones"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.600.0",
+    "@aws-sdk/client-sns": "^3.600.0",
+    "@aws-sdk/client-sqs": "^3.600.0",
+    "mysql2": "^3.10.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0"
+  }
+}
