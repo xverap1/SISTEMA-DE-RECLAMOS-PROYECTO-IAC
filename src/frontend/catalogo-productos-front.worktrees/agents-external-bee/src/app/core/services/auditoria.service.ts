@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface AuditoriaProducto {
   id?: number;
@@ -17,9 +18,8 @@ export interface AuditoriaProducto {
   providedIn: 'root'
 })
 export class AuditoriaService {
-  
-    private readonly URL_API = 'http://localhost:8080/api/v1/auditoria';
-  //private apiUrl = `${environment.apiUrl}/auditoria`; // http://localhost:8080/api/v1/auditoria
+
+  private readonly URL_API = `${environment.backendUrl}/auditoria`;
 
   constructor(private http: HttpClient) {}
 

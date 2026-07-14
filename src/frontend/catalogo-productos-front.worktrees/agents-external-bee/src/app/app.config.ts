@@ -5,11 +5,12 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
+import { reclamosAuthInterceptor } from './core/interceptors/reclamos-auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideClientHydration(withEventReplay()),
     provideHttpClient(
-      withInterceptors([jwtInterceptor])
+      withInterceptors([jwtInterceptor, reclamosAuthInterceptor])
     )
   ]
 };

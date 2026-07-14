@@ -4,8 +4,15 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { ToastService } from '../services/toast.service'; // 🌟 Inyectamos tu servicio de Toasts
 import { catchError, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
+  // Las peticiones al API Gateway de reclamos usan el token de Cognito
+  // (ver reclamos-auth.interceptor.ts), no el JWT del backend Spring Boot.
+  if (req.url.startsWith(environment.reclamosApiUrl)) {
+    return next(req);
+  }
+
   const platformId = inject(PLATFORM_ID);
   const router = inject(Router);
   const toastService = inject(ToastService); // 🌟 Conseguimos la instancia del Toast

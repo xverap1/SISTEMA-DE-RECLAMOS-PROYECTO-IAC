@@ -4,13 +4,14 @@ import { Observable, tap } from 'rxjs';
 import { LoginRequest, LoginResponse } from '../../data/interfaces/auth.interface';
 import { ReporteResponseDto } from '../../data/interfaces/producto.interface';
 import { HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root' // Al ser Standalone, se provee automáticamente en toda la app
 })
 export class ProductoService {
   // URL exacta de tu controlador AuthController en Spring Boot
-  private readonly URL_API = 'http://localhost:8080/api/v1/productos';
+  private readonly URL_API = `${environment.backendUrl}/productos`;
 
   constructor(private http: HttpClient) { }
 

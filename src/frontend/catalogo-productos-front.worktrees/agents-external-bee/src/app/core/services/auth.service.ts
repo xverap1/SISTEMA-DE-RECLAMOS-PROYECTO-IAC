@@ -3,13 +3,14 @@ import { isPlatformBrowser } from '@angular/common';           // <- Importa isP
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { LoginRequest, LoginResponse } from '../../data/interfaces/auth.interface';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private readonly URL_API = 'http://localhost:8080/api/v1/auth/login';
+  private readonly URL_API = `${environment.backendUrl}/auth/login`;
 
   // Inyectamos el PLATFORM_ID para que el servicio sepa si corre en el servidor o en el cliente
   constructor(
@@ -52,9 +53,11 @@ if (isPlatformBrowser(this.platformId)) {
 
   
   obtenerRolUsuario(): string {
-    const usuarioRol = localStorage.getItem('usuario_rol');
-    if (usuarioRol) {
-      return usuarioRol; // Retorna 'ROLE_ADMIN', 'ROLE_USER' o 'ROLE_GUEST'
+    if (isPlatformBrowser(this.platformId)) {
+      const usuarioRol = localStorage.getItem('usuario_rol');
+      if (usuarioRol) {
+        return usuarioRol; // Retorna 'ROLE_ADMIN', 'ROLE_USER' o 'ROLE_GUEST'
+      }
     }
     return '';
   }
