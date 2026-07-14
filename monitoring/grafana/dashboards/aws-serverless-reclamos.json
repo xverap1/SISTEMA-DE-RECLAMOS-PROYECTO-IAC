@@ -1,0 +1,69 @@
+{
+  "title": "Sistema de Reclamos - AWS Serverless (CloudWatch)",
+  "uid": "aws-serverless-reclamos",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "time": { "from": "now-24h", "to": "now" },
+  "refresh": "1m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Invocaciones por Lambda",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "CloudWatch" },
+      "targets": [
+        { "namespace": "AWS/Lambda", "metricName": "Invocations", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-reclamos" }, "refId": "A" },
+        { "namespace": "AWS/Lambda", "metricName": "Invocations", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-procesamiento" }, "refId": "B" },
+        { "namespace": "AWS/Lambda", "metricName": "Invocations", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-reportes" }, "refId": "C" },
+        { "namespace": "AWS/Lambda", "metricName": "Invocations", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-control-plazos" }, "refId": "D" },
+        { "namespace": "AWS/Lambda", "metricName": "Invocations", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-notificaciones" }, "refId": "E" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Errores por Lambda",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "CloudWatch" },
+      "targets": [
+        { "namespace": "AWS/Lambda", "metricName": "Errors", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-reclamos" }, "refId": "A" },
+        { "namespace": "AWS/Lambda", "metricName": "Errors", "statistic": "Sum", "dimensions": { "FunctionName": "reclamos-ciudadanos-procesamiento" }, "refId": "B" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "API Gateway - Latencia y errores",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "CloudWatch" },
+      "targets": [
+        { "namespace": "AWS/ApiGateway", "metricName": "Latency", "statistic": "Average", "dimensions": { "ApiName": "reclamos-ciudadanos-api" }, "refId": "A" },
+        { "namespace": "AWS/ApiGateway", "metricName": "4XXError", "statistic": "Sum", "dimensions": { "ApiName": "reclamos-ciudadanos-api" }, "refId": "B" },
+        { "namespace": "AWS/ApiGateway", "metricName": "5XXError", "statistic": "Sum", "dimensions": { "ApiName": "reclamos-ciudadanos-api" }, "refId": "C" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "RDS MariaDB - CPU y Conexiones",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "CloudWatch" },
+      "targets": [
+        { "namespace": "AWS/RDS", "metricName": "CPUUtilization", "statistic": "Average", "refId": "A" },
+        { "namespace": "AWS/RDS", "metricName": "DatabaseConnections", "statistic": "Average", "refId": "B" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "SQS Procesamiento - Backlog y DLQ",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "cloudwatch", "uid": "CloudWatch" },
+      "targets": [
+        { "namespace": "AWS/SQS", "metricName": "ApproximateNumberOfMessagesVisible", "statistic": "Average", "dimensions": { "QueueName": "reclamos-ciudadanos-procesamiento-queue" }, "refId": "A" },
+        { "namespace": "AWS/SQS", "metricName": "ApproximateNumberOfMessagesVisible", "statistic": "Average", "dimensions": { "QueueName": "reclamos-ciudadanos-procesamiento-dlq" }, "refId": "B" }
+      ]
+    }
+  ]
+}
