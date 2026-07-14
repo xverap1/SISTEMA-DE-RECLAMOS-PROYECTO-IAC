@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: reclamos-prometheus
+    restart: unless-stopped
+    extra_hosts:
+     
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+    ports:
+      - "9090:9090"
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.1
+    container_name: reclamos-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: reclamos-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-changeme}
+      GF_INSTALL_PLUGINS: grafana-athena-datasource
+      AWS_REGION: ${AWS_REGION:-us-east-2}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+
+volumes:
+  prometheus-data:
+  grafana-data:
