@@ -1,5 +1,8 @@
 name: CI
 
+# Se ejecuta en cada Pull Request y en cada push a develop/main.
+# Objetivo: dar feedback rápido (build + tests + linters) SIN tocar AWS.
+# El despliegue real vive en cd.yml y solo corre después de que CI pase.
 on:
   pull_request:
     branches: [develop, main]
@@ -145,8 +148,16 @@ jobs:
         with:
           directory: iac
           quiet: true
-          soft_fail: true 
+          soft_fail: true # no bloquea el pipeline; revisar hallazgos en el summary de Actions
 
+  # ---------------------------------------------------------------------
+  # Observabilidad: valida que la config de Prometheus/Grafana no esté rota
+  # ---------------------------------------------------------------------
+  # ---------------------------------------------------------------------
+  # Observabilidad: Ansible levanta Prometheus + Grafana en este mismo
+  # runner y se valida que respondan. Así se ve la automatización completa
+  # corriendo en cada push, sin depender de ningún servidor externo (EC2, etc).
+  # ---------------------------------------------------------------------
   observability:
     name: Observabilidad (Ansible -> Grafana + Prometheus + validaciones)
     runs-on: ubuntu-latest
@@ -183,9 +194,74 @@ jobs:
           sleep 5
           curl -sf http://localhost:9090/-/healthy
           curl -sf http://localhost:3000/api/health
-          echo "### Observabilidad" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Observabilidad " >> "$GITHUB_STEP_SUMMARY"
           echo "Node.js, Java 17, Docker, Terraform y AWS CLI provisionados por Ansible; Grafana y Prometheus arriba en este runner." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Bajar el stack (limpieza)
         if: always()
         run: docker compose -f ../monitoring/docker-compose.yml down -v
+
+  # ---------------------------------------------------------------------
+  # SonarQube (self-hosted, Community Edition): se levanta de cero en este
+  # mismo runner (docker compose), se corre el analisis, y se apaga al
+  # terminar.
+  # ---------------------------------------------------------------------
+  sonarqube:
+    name: SonarQube (analisis estatico, efimero en el runner)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar JDK 17 (para compilar el backend antes del analisis)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Compilar el backend (genera target/classes para sonar.java.binaries)
+        working-directory: src/backend
+        run: ./mvnw -B -q compile
+
+      - name: Levantar SonarQube + Postgres
+        working-directory: sonarqube
+        run: docker compose up -d
+
+      - name: Esperar a que SonarQube esté listo
+        run: |
+          for i in $(seq 1 40); do
+            status=$(curl -s http://localhost:9000/api/system/status | grep -o '"status":"[A-Z]*"' || true)
+            echo "intento $i: $status"
+            [[ "$status" == '"status":"UP"' ]] && break
+            sleep 5
+          done
+
+      - name: Generar un token de analisis (instancia recien creada, credenciales por defecto)
+        id: sonar_token
+        run: |
+          token=$(curl -s -u admin:admin -X POST \
+            "http://localhost:9000/api/user_tokens/generate?name=ci-$(date +%s)" \
+            | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Correr sonar-scanner
+        run: |
+          docker run --rm --network=host \
+            -e SONAR_HOST_URL=http://localhost:9000 \
+            -e SONAR_TOKEN="${{ steps.sonar_token.outputs.token }}" \
+            -v "${{ github.workspace }}:/usr/src" \
+            sonarsource/sonar-scanner-cli \
+            -Dproject.settings=sonarqube/sonar-project.properties
+
+      - name: Resumen
+        if: always()
+        run: |
+          echo "### SonarQube " >> "$GITHUB_STEP_SUMMARY"
+          echo "Análisis corrido contra una instancia efímera en este runner (sin histórico entre pipelines, ver sonarqube/README.md)." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Bajar SonarQube (limpieza)
+        if: always()
+        working-directory: sonarqube
+        run: docker compose down -v
+ 
