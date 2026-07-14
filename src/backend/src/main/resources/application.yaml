@@ -8,10 +8,11 @@ spring:
    config:
      enabled: false
   datasource:
-    # Reemplaza 'localhost:3306' si tu puerto cambia y 'mi_base_datos' por tu esquema real
-    url: jdbc:mariadb://localhost:3306/gestor-productos?createDatabaseIfNotExist=true
-    username: root
-    password: Lazarte04#
+    # Las credenciales se leen de variables de entorno (con default solo para desarrollo local).
+    # En CI/CD estas variables vienen de GitHub Actions Secrets (ver .github/workflows/cd.yml)
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/gestor-productos?createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:Lazarte04#}
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
@@ -29,16 +30,41 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
 
   mail:
-    host: smtp.mailersend.net
-    port: 587
-    username: 'MS_hclpcu@test-2p0347zwkeklzdrn.mlsender.net'
-    password: 'mssp.rBMKJYa.jpzkmgqrrx24059v.lFNWiP4'
+    host: ${MAIL_HOST:smtp.mailersend.net}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:MS_hclpcu@test-2p0347zwkeklzdrn.mlsender.net}
+    password: ${MAIL_PASSWORD:changeme}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+
+# =========================================================================
+# OBSERVABILIDAD: Actuator + Micrometer -> Prometheus -> Grafana
+# Expone /actuator/health, /actuator/info y /actuator/prometheus.
+# Prometheus (monitoring/prometheus/prometheus.yml) hace scrape de este
+# ultimo endpoint cada 15s y Grafana (monitoring/grafana) grafica las
+# metricas de JVM, HTTP (latencia/tasa de error por endpoint), Hikari
+# (pool de conexiones a MariaDB) y Resilience4j (circuit breaker).
+# =========================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
 
 # =========================================================================
 # CONFIGURACIÓN DEL CIRCUIT BREAKER (RESILIENCE4J)

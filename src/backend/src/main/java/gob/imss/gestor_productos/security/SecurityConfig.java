@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll() // Login público
                         .requestMatchers("/api/v1/clientes/**").permitAll() // Login público
+                        .requestMatchers("/actuator/health", "/actuator/prometheus", "/actuator/info").permitAll() // Scrape de Prometheus (ver monitoring/prometheus/prometheus.yml)
                         .anyRequest().authenticated()                  // Catálogo protegido
                 )
                 .sessionManagement(session -> session
