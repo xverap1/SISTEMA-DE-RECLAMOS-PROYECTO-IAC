@@ -1,0 +1,34 @@
+---
+- name: Verificar version de Node.js instalada
+  ansible.builtin.command: node --version
+  register: nodejs_check
+  changed_when: false
+  failed_when: false
+
+- name: Instalar Node.js segun node_major_version (NodeSource)
+  when: nodejs_check.rc != 0 or (node_major_version ~ '.') not in nodejs_check.stdout
+  block:
+    - name: Descargar el script de instalacion de NodeSource
+      ansible.builtin.get_url:
+        url: "https://deb.nodesource.com/setup_{{ node_major_version }}.x"
+        dest: /tmp/nodesource_setup.sh
+        mode: "0755"
+
+    - name: Ejecutar el script de NodeSource (agrega el repo de apt)
+      ansible.builtin.command: /tmp/nodesource_setup.sh
+      changed_when: true
+
+    - name: Instalar Node.js
+      ansible.builtin.apt:
+        name: nodejs
+        state: present
+        update_cache: true
+
+- name: Confirmar version de Node.js
+  ansible.builtin.command: node --version
+  register: nodejs_final
+  changed_when: false
+
+- name: Mostrar version de Node.js instalada
+  ansible.builtin.debug:
+    msg: "Node.js {{ nodejs_final.stdout }}"

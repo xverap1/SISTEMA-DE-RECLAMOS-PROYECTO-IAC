@@ -1,0 +1,15 @@
+---
+- name: Provisionar el entorno completo del Sistema de Reclamos
+  hosts: monitoring
+  become: true
+  gather_facts: true
+
+  roles:
+    - prerequisites
+    - nodejs
+    - java
+    - docker
+    - terraform
+    - aws_cli
+    - app_dependencies
+    - monitoring

@@ -1,0 +1,49 @@
+---
+- name: Crear directorio remoto del stack de monitoreo
+  ansible.builtin.file:
+    path: "{{ monitoring_remote_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Copiar docker-compose.yml
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../monitoring/docker-compose.yml"
+    dest: "{{ monitoring_remote_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Copiar carpeta de configuración de Prometheus
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../monitoring/prometheus/"
+    dest: "{{ monitoring_remote_dir }}/prometheus/"
+    mode: "0644"
+
+- name: Copiar provisioning y dashboards de Grafana
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../monitoring/grafana/"
+    dest: "{{ monitoring_remote_dir }}/grafana/"
+    mode: "0644"
+
+- name: Ajustar el target de Prometheus hacia el backend (IP/host real)
+  ansible.builtin.lineinfile:
+    path: "{{ monitoring_remote_dir }}/prometheus/prometheus.yml"
+    regexp: '^\s*- targets: \["host.docker.internal:8080"\]'
+    line: '        - targets: ["{{ backend_metrics_target }}"]'
+    backrefs: false
+  when: backend_metrics_target != "host.docker.internal:8080"
+
+- name: Generar archivo .env para docker compose
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ monitoring_remote_dir }}/.env"
+    mode: "0600"
+
+- name: Levantar el stack (Prometheus + Grafana + node-exporter)
+  community.docker.docker_compose_v2:
+    project_src: "{{ monitoring_remote_dir }}"
+    state: present
+    pull: always
+  register: monitoring_stack
+
+- name: Mostrar estado de los servicios
+  ansible.builtin.debug:
+    var: monitoring_stack.services

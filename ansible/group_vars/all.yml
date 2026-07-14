@@ -1,0 +1,13 @@
+---
+monitoring_remote_dir: /opt/reclamos-monitoring
+grafana_admin_user: admin
+
+grafana_admin_password: "{{ lookup('env', 'GRAFANA_ADMIN_PASSWORD') | default('changeme', true) }}"
+aws_region: us-east-2
+backend_metrics_target: "host.docker.internal:8080"
+
+frontend_dir: "src/frontend/catalogo-productos-front.worktrees/agents-external-bee"
+
+node_major_version: "20"
+java_version: "17"
+terraform_version: "1.9.5"

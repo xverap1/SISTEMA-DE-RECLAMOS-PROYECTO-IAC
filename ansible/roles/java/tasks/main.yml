@@ -1,0 +1,23 @@
+---
+- name: Verificar version de Java instalada
+  ansible.builtin.command: java -version
+  register: java_check
+  changed_when: false
+  failed_when: false
+
+- name: Instalar OpenJDK {{ java_version }}
+  when: java_check.rc != 0 or (java_version ~ '.') not in (java_check.stderr | default(''))
+  ansible.builtin.apt:
+    name: "openjdk-{{ java_version }}-jdk"
+    state: present
+    update_cache: true
+
+- name: Confirmar version de Java
+  ansible.builtin.command: java -version
+  register: java_final
+  changed_when: false
+  failed_when: false
+
+- name: Mostrar version de Java instalada
+  ansible.builtin.debug:
+    msg: "{{ java_final.stderr_lines[0] | default('No se pudo determinar la version de Java') }}"

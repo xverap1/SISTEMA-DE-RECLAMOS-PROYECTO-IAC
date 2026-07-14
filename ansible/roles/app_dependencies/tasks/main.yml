@@ -1,0 +1,30 @@
+---
+- name: Instalar dependencias de las Lambdas (npm install)
+  become: false
+  ansible.builtin.command: npm install
+  args:
+    chdir: "{{ playbook_dir }}/../src/lambdas"
+  register: app_dependencies_lambdas_result
+  changed_when: "'added' in app_dependencies_lambdas_result.stdout"
+
+- name: Verificar que exista package-lock.json del frontend
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/../{{ frontend_dir }}/package-lock.json"
+  register: app_dependencies_frontend_lockfile
+
+- name: Instalar dependencias del frontend (npm ci)
+  become: false
+  ansible.builtin.command: npm ci
+  args:
+    chdir: "{{ playbook_dir }}/../{{ frontend_dir }}"
+  register: app_dependencies_frontend_result
+  changed_when: "'added' in app_dependencies_frontend_result.stdout or 'up to date' not in app_dependencies_frontend_result.stdout"
+  when: app_dependencies_frontend_lockfile.stat.exists
+
+- name: Descargar dependencias del backend (Maven, modo offline)
+  become: false
+  ansible.builtin.command: ./mvnw -B -q dependency:go-offline
+  args:
+    chdir: "{{ playbook_dir }}/../src/backend"
+  register: app_dependencies_backend_result
+  changed_when: true

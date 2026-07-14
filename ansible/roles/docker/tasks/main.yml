@@ -1,0 +1,33 @@
+---
+- name: Verificar si Docker ya está instalado
+  ansible.builtin.command: docker --version
+  register: docker_check
+  changed_when: false
+  failed_when: false
+
+- name: Instalar Docker (solo si no estaba presente)
+  when: docker_check.rc != 0
+  block:
+    - name: Actualizar cache de apt
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Instalar Docker y el plugin docker compose
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose-v2
+        state: present
+
+    - name: Habilitar e iniciar el servicio Docker
+      ansible.builtin.systemd:
+        name: docker
+        enabled: true
+        state: started
+
+- name: Agregar el usuario actual al grupo docker (para no requerir sudo)
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: true
+  when: docker_check.rc != 0
