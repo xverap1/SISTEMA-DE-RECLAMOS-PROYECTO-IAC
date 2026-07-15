@@ -32,6 +32,9 @@ jobs:
           java-version: "17"
           cache: maven
 
+      - name: Dar permiso de ejecución a mvnw
+        run: chmod +x mvnw
+
       - name: Compilar y ejecutar pruebas
         run: ./mvnw -B clean verify
 
@@ -218,6 +221,10 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
+
+      - name: Dar permiso de ejecución a mvnw
+        working-directory: src/backend
+        run: chmod +x mvnw
 
       - name: Compilar el backend (genera target/classes para sonar.java.binaries)
         working-directory: src/backend

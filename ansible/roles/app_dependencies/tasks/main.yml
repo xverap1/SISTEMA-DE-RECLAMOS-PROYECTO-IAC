@@ -21,6 +21,12 @@
   changed_when: "'added' in app_dependencies_frontend_result.stdout or 'up to date' not in app_dependencies_frontend_result.stdout"
   when: app_dependencies_frontend_lockfile.stat.exists
 
+- name: Dar permiso de ejecución a mvnw
+  become: false
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/../src/backend/mvnw"
+    mode: "0755"
+
 - name: Descargar dependencias del backend (Maven, modo offline)
   become: false
   ansible.builtin.command: ./mvnw -B -q dependency:go-offline

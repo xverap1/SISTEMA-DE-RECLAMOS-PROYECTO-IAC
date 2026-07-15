@@ -15,16 +15,17 @@ resource "aws_s3_bucket" "frontend" {
       days = 7  # Elimina versiones antiguas después de 7 días (si versioning está habilitado)
     }
   }
-    logging {
+
+  logging {
     target_bucket = aws_s3_bucket.cloudfront_logs.id
     target_prefix = "logs/frontend/"
   }
 }
 
 resource "aws_s3_bucket" "cloudfront_logs" {
-  bucket = "${local.project_name}-logs-alt-${var.environment}"
-  tags   = local.common_tags
-  force_destroy=true
+  bucket        = "${local.project_name}-logs-alt-${var.environment}"
+  tags          = local.common_tags
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_policy" "cloudfront_logs" {
@@ -55,7 +56,7 @@ resource "aws_s3_bucket_ownership_controls" "cloudfront_logs" {
   bucket = aws_s3_bucket.cloudfront_logs.id
 
   rule {
-    object_ownership = "ObjectWriter" 
+    object_ownership = "ObjectWriter"
   }
 }
 
