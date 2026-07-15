@@ -1,0 +1,208 @@
+name: CD - Despliegue temporal (todo arriba, luego auto-destroy)
+
+# Se dispara SOLO manualmente. No corre automático con push ni con CI,
+# a diferencia de cd.yml (que sigue existiendo para despliegues "normales").
+#
+# Este workflow:
+#   1. Aplica toda la infraestructura de AWS con Terraform (VPC, RDS, Lambdas,
+#      API Gateway, Cognito, S3, CloudFront, SQS, SNS, SES, WAF, CloudWatch).
+#   2. Compila y sube el frontend a S3 + invalida CloudFront.
+#   3. Levanta Prometheus + Grafana (vía Ansible) en el runner.
+#   4. Espera el tiempo que indiques.
+#   5. Destruye TODO: baja el stack de monitoring y corre terraform destroy.
+#
+# Nota sobre Checkov y SonarQube: esos ya corren en ci.yml y son efímeros
+# por diseño (se levantan y se apagan dentro del mismo job, en cada push).
+# No manejan estado persistente en AWS, así que no necesitan destroy aparte.
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration_minutes:
+        description: "Minutos que todo debe quedar arriba antes de auto-destruirse"
+        required: true
+        default: "90"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-2
+  FRONTEND_DIR: src/frontend/catalogo-productos-front.worktrees/agents-external-bee
+
+jobs:
+  # ---------------------------------------------------------------------
+  # 1) Infraestructura AWS (Terraform) + build de Lambdas
+  # ---------------------------------------------------------------------
+  deploy-infra:
+    name: 1. Terraform apply + Lambdas
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: iac
+    outputs:
+      frontend_bucket: ${{ steps.tf_outputs.outputs.frontend_bucket }}
+      cloudfront_id: ${{ steps.tf_outputs.outputs.cloudfront_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configurar Node.js 18 (para empaquetar las Lambdas)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+          cache-dependency-path: src/lambdas/package-lock.json
+
+      - name: Instalar dependencias y construir las Lambdas
+        working-directory: src/lambdas
+        run: |
+          npm install
+          npm run build
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.5"
+
+      - name: terraform init
+        run: terraform init
+
+      - name: terraform apply
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
+      - name: Leer outputs de Terraform (bucket + distribution id)
+        id: tf_outputs
+        run: |
+          echo "frontend_bucket=$(terraform output -raw frontend_bucket_name)" >> "$GITHUB_OUTPUT"
+          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_OUTPUT"
+
+  # ---------------------------------------------------------------------
+  # 2) Frontend: build + subir a S3 + invalidar CloudFront
+  # ---------------------------------------------------------------------
+  deploy-frontend:
+    name: 2. Build + deploy frontend (S3 + CloudFront)
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Build de producción
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          npm ci
+          npm run build -- --configuration production
+
+      - name: Sincronizar con S3
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          aws s3 sync dist/catalogo-productos-front/browser "s3://${{ needs.deploy-infra.outputs.frontend_bucket }}" --delete
+
+      - name: Invalidar caché de CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ needs.deploy-infra.outputs.cloudfront_id }}" \
+            --paths "/*"
+
+  # ---------------------------------------------------------------------
+  # 3) Observabilidad: Ansible levanta Prometheus + Grafana en el runner
+  # ---------------------------------------------------------------------
+  deploy-monitoring:
+    name: 3. Observabilidad (Ansible -> Grafana + Prometheus)
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: ansible
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Ansible y dependencias
+        run: |
+          pip install ansible
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Ejecutar playbook (Docker + Prometheus + Grafana)
+        run: |
+          ansible-playbook -i inventory/hosts.ini playbook.yml \
+            --extra-vars "grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}"
+
+      - name: Verificar que Grafana y Prometheus levantaron
+        run: |
+          sleep 5
+          curl -sf http://localhost:3000/api/health
+          curl -sf http://localhost:9090/-/healthy
+
+      # OJO: este stack de monitoring vive únicamente dentro de este runner
+      # de GitHub Actions. Al terminar el job, el runner se destruye solo
+      # y con él Prometheus/Grafana desaparecen — no hace falta un paso
+      # explícito de "bajar" el stack aquí porque nunca queda expuesto
+      # a internet ni genera costo en AWS.
+
+  # ---------------------------------------------------------------------
+  # 4) Esperar el tiempo indicado y luego destruir TODO en AWS
+  # ---------------------------------------------------------------------
+  wait-and-destroy:
+    name: 4. Esperar y luego destruir toda la infraestructura
+    needs: [deploy-infra, deploy-frontend, deploy-monitoring]
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: iac
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar credenciales AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.5"
+
+      - name: Esperar el tiempo indicado
+        run: |
+          MINUTOS="${{ github.event.inputs.duration_minutes }}"
+          echo "Todo desplegado. Esperando $MINUTOS minutos antes de destruir..."
+          sleep $((MINUTOS * 60))
+
+      - name: terraform init
+        run: terraform init
+
+      - name: terraform destroy
+        run: terraform destroy -auto-approve
+        env:
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
+      - name: Resumen
+        if: always()
+        run: |
+          echo "### Limpieza completa " >> "$GITHUB_STEP_SUMMARY"
+          echo "Toda la infraestructura de AWS fue destruida. Prometheus/Grafana ya se apagaron solos junto con el runner del job anterior." >> "$GITHUB_STEP_SUMMARY"

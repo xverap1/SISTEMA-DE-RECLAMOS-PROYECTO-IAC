@@ -1,6 +1,7 @@
 resource "aws_s3_bucket" "frontend" {
-  bucket = "${local.project_name}-frontend-${var.environment}"
-  tags   = local.common_tags
+  bucket        = "${local.project_name}-frontend-${var.environment}"
+  tags          = local.common_tags
+  force_destroy = true # permite "terraform destroy" aunque el bucket tenga archivos (necesario para el pipeline de apply/destroy temporal)
 
   lifecycle_rule {
     id      = "auto-expire-old-objects"
