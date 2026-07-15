@@ -5,12 +5,13 @@
 
 # Lambda Function: Reclamos
 resource "aws_lambda_function" "lambda_reclamos" {
-  filename      = "lambda_reclamos.zip"
-  function_name = "${local.project_name}-reclamos"
-  role          = aws_iam_role.lambda_reclamos_role.arn
-  handler       = "index.handler"
-  runtime       = "python3.9"
-  timeout       = 30
+  filename         = data.archive_file.lambda_reclamos_zip.output_path
+  source_code_hash = data.archive_file.lambda_reclamos_zip.output_base64sha256
+  function_name    = "${local.project_name}-reclamos"
+  role             = aws_iam_role.lambda_reclamos_role.arn
+  handler          = "index.handler"
+  runtime          = "python3.9"
+  timeout          = 30
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
@@ -34,12 +35,13 @@ resource "aws_lambda_function" "lambda_reclamos" {
 
 # Lambda Function: Procesamiento
 resource "aws_lambda_function" "lambda_procesamiento" {
-  filename      = "lambda_procesamiento.zip"
-  function_name = "${local.project_name}-procesamiento"
-  role          = aws_iam_role.lambda_procesamiento_role.arn
-  handler       = "index.handler"
-  runtime       = "python3.9"
-  timeout       = 60
+  filename         = data.archive_file.lambda_procesamiento_zip.output_path
+  source_code_hash = data.archive_file.lambda_procesamiento_zip.output_base64sha256
+  function_name    = "${local.project_name}-procesamiento"
+  role             = aws_iam_role.lambda_procesamiento_role.arn
+  handler          = "index.handler"
+  runtime          = "python3.9"
+  timeout          = 60
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
@@ -62,12 +64,13 @@ resource "aws_lambda_function" "lambda_procesamiento" {
 
 # Lambda Function: Reportes
 resource "aws_lambda_function" "lambda_reportes" {
-  filename      = "lambda_reportes.zip"
-  function_name = "${local.project_name}-reportes"
-  role          = aws_iam_role.lambda_reportes_role.arn
-  handler       = "index.handler"
-  runtime       = "python3.9"
-  timeout       = 60
+  filename         = data.archive_file.lambda_reportes_zip.output_path
+  source_code_hash = data.archive_file.lambda_reportes_zip.output_base64sha256
+  function_name    = "${local.project_name}-reportes"
+  role             = aws_iam_role.lambda_reportes_role.arn
+  handler          = "index.handler"
+  runtime          = "python3.9"
+  timeout          = 60
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
@@ -90,12 +93,13 @@ resource "aws_lambda_function" "lambda_reportes" {
 
 # Lambda Function: Control de Plazos
 resource "aws_lambda_function" "lambda_control_plazos" {
-  filename      = "lambda_control_plazos.zip"
-  function_name = "${local.project_name}-control-plazos"
-  role          = aws_iam_role.lambda_control_plazos_role.arn
-  handler       = "index.handler"
-  runtime       = "python3.9"
-  timeout       = 300
+  filename         = data.archive_file.lambda_control_plazos_zip.output_path
+  source_code_hash = data.archive_file.lambda_control_plazos_zip.output_base64sha256
+  function_name    = "${local.project_name}-control-plazos"
+  role             = aws_iam_role.lambda_control_plazos_role.arn
+  handler          = "index.handler"
+  runtime          = "python3.9"
+  timeout          = 300
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
@@ -119,12 +123,13 @@ resource "aws_lambda_function" "lambda_control_plazos" {
 
 # Lambda Function: Notificaciones
 resource "aws_lambda_function" "lambda_notificaciones" {
-  filename      = "lambda_notificaciones.zip"
-  function_name = "${local.project_name}-notificaciones"
-  role          = aws_iam_role.lambda_notificaciones_role.arn
-  handler       = "index.handler"
-  runtime       = "python3.9"
-  timeout       = 30
+  filename         = data.archive_file.lambda_notificaciones_zip.output_path
+  source_code_hash = data.archive_file.lambda_notificaciones_zip.output_base64sha256
+  function_name    = "${local.project_name}-notificaciones"
+  role             = aws_iam_role.lambda_notificaciones_role.arn
+  handler          = "index.handler"
+  runtime          = "python3.9"
+  timeout          = 30
 
   vpc_config {
     subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
