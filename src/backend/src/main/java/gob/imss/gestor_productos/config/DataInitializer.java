@@ -4,10 +4,12 @@ import gob.imss.gestor_productos.model.Usuario;
 import gob.imss.gestor_productos.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile; // <-- Importar Profile
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!test") // <-- Agregar esta línea (Significa: NO ejecutar en perfil test)
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
