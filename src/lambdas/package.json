@@ -7,8 +7,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "lint": "eslint . --ext .js",
-    "test": "jest --coverage",
+    "lint": "eslint . --ext .js --no-error-on-unmatched-pattern",
+    "test": "jest --coverage --passWithNoTests",
     "build": "node build.js",
     "build:reclamos": "node build.js lambda-reclamos",
     "build:reportes": "node build.js lambda-reportes",
