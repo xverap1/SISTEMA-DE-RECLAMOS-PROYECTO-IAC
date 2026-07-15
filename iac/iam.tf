@@ -24,8 +24,8 @@ resource "aws_iam_role_policy" "lambda_reclamos_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = "arn:aws:logs:::*"
       },
       {
@@ -79,8 +79,8 @@ resource "aws_iam_role_policy" "lambda_procesamiento_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = "arn:aws:logs:::*"
       },
       {
@@ -133,8 +133,8 @@ resource "aws_iam_role_policy" "lambda_reportes_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = "arn:aws:logs:::*"
       },
       {
@@ -182,8 +182,8 @@ resource "aws_iam_role_policy" "lambda_control_plazos_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = "arn:aws:logs:::*"
       },
       {
@@ -231,8 +231,8 @@ resource "aws_iam_role_policy" "lambda_notificaciones_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
         Resource = "arn:aws:logs:::*"
       },
       {
@@ -288,7 +288,7 @@ resource "aws_iam_role" "authenticated_role" {
       Principal = { Federated = "cognito-identity.amazonaws.com" }
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
-        StringEquals = { "cognito-identity.amazonaws.com:aud" = aws_cognito_identity_pool.main.id }
+        StringEquals             = { "cognito-identity.amazonaws.com:aud" = aws_cognito_identity_pool.main.id }
         "ForAnyValue:StringLike" = { "cognito-identity.amazonaws.com:amr" = "authenticated" }
       }
     }]
@@ -304,8 +304,8 @@ resource "aws_iam_role_policy" "authenticated_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect   = "Allow"
-      Action   = ["execute-api:Invoke"]
+      Effect = "Allow"
+      Action = ["execute-api:Invoke"]
       Resource = [
         "arn:aws:execute-api:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*/*/GET/*",
         "arn:aws:execute-api:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*/*/POST/*",

@@ -31,5 +31,5 @@ variable "db_username" {
 variable "db_password" {
   description = "Contraseña del usuario administrador de MariaDB"
   type        = string
-  sensitive   = true   # Terraform no mostrará este valor en los logs
+  sensitive   = true # Terraform no mostrará este valor en los logs
 }

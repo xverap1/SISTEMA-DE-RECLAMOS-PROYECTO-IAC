@@ -17,10 +17,10 @@ resource "aws_api_gateway_rest_api" "main" {
 # API Gateway Authorizer (Cognito)
 resource "aws_api_gateway_authorizer" "cognito" {
   name                   = "${local.project_name}-cognito-authorizer"
-  rest_api_id           = aws_api_gateway_rest_api.main.id
-  type                  = "COGNITO_USER_POOLS"
-  provider_arns         = [aws_cognito_user_pool.main.arn]
-  identity_source       = "method.request.header.Authorization"
+  rest_api_id            = aws_api_gateway_rest_api.main.id
+  type                   = "COGNITO_USER_POOLS"
+  provider_arns          = [aws_cognito_user_pool.main.arn]
+  identity_source        = "method.request.header.Authorization"
   authorizer_credentials = aws_iam_role.api_gateway_role.arn
 }
 
@@ -138,8 +138,8 @@ resource "aws_api_gateway_integration" "reclamos_lambda" {
   http_method = aws_api_gateway_method.reclamos_get.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.lambda_reclamos.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.lambda_reclamos.invoke_arn
 }
 
 resource "aws_api_gateway_integration" "reclamos_post_lambda" {
@@ -148,8 +148,8 @@ resource "aws_api_gateway_integration" "reclamos_post_lambda" {
   http_method = aws_api_gateway_method.reclamos_post.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.lambda_reclamos.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.lambda_reclamos.invoke_arn
 }
 
 resource "aws_api_gateway_integration" "reclamos_id_get_lambda" {
@@ -158,8 +158,8 @@ resource "aws_api_gateway_integration" "reclamos_id_get_lambda" {
   http_method = aws_api_gateway_method.reclamos_id_get.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.lambda_reclamos.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.lambda_reclamos.invoke_arn
 }
 
 resource "aws_api_gateway_integration" "reclamos_id_put_lambda" {
@@ -168,8 +168,8 @@ resource "aws_api_gateway_integration" "reclamos_id_put_lambda" {
   http_method = aws_api_gateway_method.reclamos_id_put.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.lambda_reclamos.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.lambda_reclamos.invoke_arn
 }
 
 # Integración para Lambda Reportes
@@ -179,8 +179,8 @@ resource "aws_api_gateway_integration" "reportes_lambda" {
   http_method = aws_api_gateway_method.reportes_get.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.lambda_reportes.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.lambda_reportes.invoke_arn
 }
 
 # Permisos para que API Gateway invoque Lambda
@@ -214,7 +214,7 @@ resource "aws_api_gateway_integration" "options_reclamos" {
   http_method = aws_api_gateway_method.options_reclamos.http_method
 
   type = "MOCK"
-  
+
   request_templates = {
     "application/json" = jsonencode({
       statusCode = 200

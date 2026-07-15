@@ -19,12 +19,12 @@ resource "aws_lambda_function" "lambda_reclamos" {
 
   environment {
     variables = {
-      DB_HOST     = aws_db_instance.main.address
-      DB_PORT     = tostring(aws_db_instance.main.port)
-      DB_NAME     = aws_db_instance.main.db_name
-      DB_USER     = var.db_username
-      SQS_QUEUE_URL            = aws_sqs_queue.procesamiento_queue.url
-      SNS_TOPIC_NOTIFICATIONS  = aws_sns_topic.reclamos_notifications.arn
+      DB_HOST                 = aws_db_instance.main.address
+      DB_PORT                 = tostring(aws_db_instance.main.port)
+      DB_NAME                 = aws_db_instance.main.db_name
+      DB_USER                 = var.db_username
+      SQS_QUEUE_URL           = aws_sqs_queue.procesamiento_queue.url
+      SNS_TOPIC_NOTIFICATIONS = aws_sns_topic.reclamos_notifications.arn
     }
   }
 
@@ -48,10 +48,10 @@ resource "aws_lambda_function" "lambda_procesamiento" {
 
   environment {
     variables = {
-      DB_HOST  = aws_db_instance.main.address
-      DB_PORT  = tostring(aws_db_instance.main.port)
-      DB_NAME  = aws_db_instance.main.db_name
-      DB_USER  = var.db_username
+      DB_HOST                 = aws_db_instance.main.address
+      DB_PORT                 = tostring(aws_db_instance.main.port)
+      DB_NAME                 = aws_db_instance.main.db_name
+      DB_USER                 = var.db_username
       SNS_TOPIC_NOTIFICATIONS = aws_sns_topic.reclamos_notifications.arn
     }
   }

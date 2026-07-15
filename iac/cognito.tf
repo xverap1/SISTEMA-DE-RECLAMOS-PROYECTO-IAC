@@ -40,23 +40,23 @@ resource "aws_cognito_user_pool" "main" {
   # Configuración de esquema de atributos
   schema {
     attribute_data_type = "String"
-    name               = "email"
-    required           = true
-    mutable            = true
+    name                = "email"
+    required            = true
+    mutable             = true
   }
 
   schema {
     attribute_data_type = "String"
-    name               = "name"
-    required           = true
-    mutable            = true
+    name                = "name"
+    required            = true
+    mutable             = true
   }
 
   schema {
     attribute_data_type = "String"
-    name               = "phone_number"
-    required           = false
-    mutable            = true
+    name                = "phone_number"
+    required            = false
+    mutable             = true
   }
 
   tags = local.common_tags
@@ -78,7 +78,7 @@ resource "aws_cognito_user_pool_client" "main" {
 
   # Configuración de tokens
   access_token_validity  = 1  # 1 hora
-  id_token_validity     = 1  # 1 hora
+  id_token_validity      = 1  # 1 hora
   refresh_token_validity = 30 # 30 días
 
   token_validity_units {
@@ -89,18 +89,18 @@ resource "aws_cognito_user_pool_client" "main" {
 
   # URLs de callback (para desarrollo local y producción)
   callback_urls = [
-   # "http://localhost:3000/callback" ,
+    # "http://localhost:3000/callback" ,
     "https://reclamos-ciudadanos-dev.auth.us-east-2.amazoncognito.com/oauth2/idpresponse"
   ]
 
   logout_urls = [
-   # "http://localhost:3000/logout" ,
+    # "http://localhost:3000/logout" ,
     "https://reclamos-ciudadanos-dev.auth.us-east-2.amazoncognito.com/logout"
   ]
 
   # Configuración OAuth
-  allowed_oauth_flows = ["code"]
-  allowed_oauth_scopes = ["email", "openid", "profile"]
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile"]
   allowed_oauth_flows_user_pool_client = true
 
   # Configuración de lectura y escritura de atributos

@@ -8,11 +8,11 @@ resource "aws_s3_bucket" "frontend" {
     enabled = true
 
     expiration {
-      days = 30  # Elimina objetos después de 30 días
+      days = 30 # Elimina objetos después de 30 días
     }
 
     noncurrent_version_expiration {
-      days = 7  # Elimina versiones antiguas después de 7 días (si versioning está habilitado)
+      days = 7 # Elimina versiones antiguas después de 7 días (si versioning está habilitado)
     }
   }
 
@@ -35,8 +35,8 @@ resource "aws_s3_bucket_policy" "cloudfront_logs" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "AllowCloudFrontLogs"
-        Effect    = "Allow"
+        Sid    = "AllowCloudFrontLogs"
+        Effect = "Allow"
         Principal = {
           Service = "cloudfront.amazonaws.com"
         }

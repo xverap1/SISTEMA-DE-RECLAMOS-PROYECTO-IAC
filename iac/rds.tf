@@ -51,17 +51,17 @@ resource "aws_db_instance" "main" {
 
   # Motor — mismo que tenían localmente
   engine         = "mariadb"
-  engine_version = "10.11"         # versión LTS de MariaDB en RDS
-  instance_class = "db.t3.micro"   # la más barata, suficiente para dev/curso
+  engine_version = "10.11"       # versión LTS de MariaDB en RDS
+  instance_class = "db.t3.micro" # la más barata, suficiente para dev/curso
 
   # Almacenamiento
-  allocated_storage     = 20       # GB mínimo
-  max_allocated_storage = 100      # autoescala hasta 100 GB si hace falta
+  allocated_storage     = 20  # GB mínimo
+  max_allocated_storage = 100 # autoescala hasta 100 GB si hace falta
   storage_type          = "gp2"
   storage_encrypted     = true
 
   # Base de datos inicial — la misma que tenían: gestor-productos
-  db_name  = "gestorproductos"     # RDS no permite guiones en el nombre
+  db_name  = "gestorproductos" # RDS no permite guiones en el nombre
   username = var.db_username
   password = var.db_password
   port     = 3306
@@ -69,10 +69,10 @@ resource "aws_db_instance" "main" {
   # Red — dentro de la VPC, en subnets privadas
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
-  publicly_accessible    = false   # NO exponer a internet
+  publicly_accessible    = false # NO exponer a internet
 
   # Backups automáticos
-  backup_retention_period = 7      # guarda backups 7 días
+  backup_retention_period = 7 # guarda backups 7 días
   backup_window           = "03:00-04:00"
   maintenance_window      = "Mon:04:00-Mon:05:00"
 
@@ -83,8 +83,8 @@ resource "aws_db_instance" "main" {
   multi_az = false
 
   # Protección contra borrado accidental
-  deletion_protection = false      # en producción cambiar a true
-  skip_final_snapshot = true       # en producción cambiar a false
+  deletion_protection = false # en producción cambiar a true
+  skip_final_snapshot = true  # en producción cambiar a false
 
   tags = merge(local.common_tags, {
     Name = "${local.project_name}-mariadb"
