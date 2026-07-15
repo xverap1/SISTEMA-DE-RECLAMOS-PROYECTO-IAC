@@ -72,7 +72,12 @@ jobs:
           terraform_version: "1.9.5"
 
       - name: terraform init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=sistema-reclamos-temporal/${{ github.run_id }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
 
       - name: terraform apply
         run: terraform apply -auto-approve
@@ -193,7 +198,12 @@ jobs:
           sleep $((MINUTOS * 60))
 
       - name: terraform init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=sistema-reclamos-temporal/${{ github.run_id }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
 
       - name: terraform destroy
         run: terraform destroy -auto-approve
