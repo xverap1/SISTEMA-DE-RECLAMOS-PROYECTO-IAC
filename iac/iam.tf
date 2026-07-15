@@ -2,7 +2,7 @@
 # IAM Role para Lambda Reclamos
 # =============================================================================
 resource "aws_iam_role" "lambda_reclamos_role" {
-  name = "${local.project_name}-lambda-reclamos-role"
+  name = "${local.project_name} - reclamos role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
